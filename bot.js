@@ -4,8 +4,8 @@ const config = require('./Data/config.json');
 
 const opts = config; //This is the format for the config, as follows:
 // "identity": {
-//     "username": "testbot",
-//     "password": "oauth:"
+//     "username": "",
+//     "password": ""
 // },
 // "channels": [
 //     ""
@@ -17,6 +17,7 @@ const opts = config; //This is the format for the config, as follows:
 //     "secure": true,
 //     "reconnect": true
 // },
+//"prefix": ""
 
 const client = new tmi.client(opts);
 client.on('message', onMessage);
@@ -54,6 +55,10 @@ function onMessage(target, context, msg, self)
             client.say(target, `pong! ${ping}ms`);
             break;
 
+        case 'discord':
+            client.say(target, `'Ere's a link to me shitey Discord server: https://discord.gg/F89zVvBUXr (pls join).`);
+            break;
+        
         default:
 
             break;
@@ -66,25 +71,43 @@ function onMessage(target, context, msg, self)
     }
 
     switch(commandName.toLocaleLowerCase())
-    {
+    {     
         case 'ban':
             client.ban(target, splitMessage[1], splitMessage[2]);
             break;
+        
         case 'unban':
             client.unban(target, splitMessage[1]);
             break;
-        case 'slowmode':
-            if(splitMessage[1] == "0" || splitMessage[1] == "off")
+        
+        case 'slowmode': case "slow":
+            var val = "0";
+
+            if(splitMessage[1] === "spam")
+            {
+                val = "15";
+            }
+
+            if(splitMessage[1] == "off" || splitMessage[1] == "0")
             {
                 client.slowoff(target);
+                break;
             }
 
-            else
-            {
-               client.slow(target, splitMessage[1]);
-            }
+            val = splitMessage[1];
+            client.slow(target, val);
+            client.say(target, `Set the slowmode to ${val} seconds`);
 
             break;    
+
+        case "clear": case "purge":
+            client.clear(target);
+            break;
+
+        case "timeout": case "time":
+            client.timeout(target, splitMessage[1], splitMessage[2], splitMessage[3]);
+            client.say(target, `User ${splitMessage[1]} has been timed out for ${splitMessage[2]} seconds with reason: ${splitMessage[3]}`)
+            break;
     }
 }
 
@@ -98,10 +121,10 @@ function logMessage(target, context, msg, self)
     var buildString = `[${target}] <-> ${context['username']} -> ${msg}`;
     console.log('\x1b[36m%s\x1b[0m', buildString);
     fs.exists('./Data/chatLog.txt', function(exists) {
-        fs.writeFile('./Data/chatLog.txt', buildString, 'utf-8', function(err) {
+        fs.appendFile('./Data/chatLog.txt', `${buildString}\n`, 'utf-8', function(err) {
             if(err)
             {
-                console.error('\x1b[31m%s\x1b[0m', err);
+                console.error('\x1b[31m%s\x1b[0m', err); //Spooky Js console shit. 
             }
         });
     });
