@@ -32,7 +32,7 @@ function onMessage(target, context, msg, self)
         return;
     }
 
-    const splitMessage = msg.trim().split(" ");
+    const splitMessage = msg.trim().split(" "); //Just divide our message up into an array.
     
     if(!splitMessage.length)
     {
@@ -96,15 +96,20 @@ function onMessage(target, context, msg, self)
 
             val = splitMessage[1];
             client.slow(target, val);
-            client.say(target, `Set the slowmode to ${val} seconds`);
+            client.say(target, `Set the slowmode to ${val} seconds.`);
 
             break;    
+
+        case "slowoff":
+            client.slowoff(target);
+            client.say(target, "Set the slowmode to 0 seconds.");
+            break;
 
         case "clear": case "purge":
             client.clear(target);
             break;
 
-        case "timeout": case "time":
+        case "timeout": case "time": case "mute": case "tempmute":
             client.timeout(target, splitMessage[1], splitMessage[2], splitMessage[3]);
             client.say(target, `User ${splitMessage[1]} has been timed out for ${splitMessage[2]} seconds with reason: ${splitMessage[3]}`)
             break;
@@ -124,7 +129,7 @@ function logMessage(target, context, msg, self)
         fs.appendFile('./Data/chatLog.txt', `${buildString}\n`, 'utf-8', function(err) {
             if(err)
             {
-                console.error('\x1b[31m%s\x1b[0m', err); //Spooky Js console shit. 
+                console.error('\x1b[31m%s\x1b[0m', err); //Spooky JS console shit. 
             }
         });
     });
